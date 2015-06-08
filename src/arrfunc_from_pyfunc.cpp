@@ -18,6 +18,7 @@
 #include <exception_translation.hpp>
 #include <array_assign_from_py.hpp>
 #include <kernels/apply_pyobject_kernel.hpp>
+#include <kernels/apply_numba_kernel.hpp>
 
 using namespace std;
 using namespace pydynd;
@@ -33,5 +34,11 @@ dynd::nd::arrfunc pydynd::nd::functional::apply(PyObject *instantiate_pyfunc,
   }
 
   Py_INCREF(instantiate_pyfunc);
-  return arrfunc::make<apply_pyobject_kernel>(proto, instantiate_pyfunc, 0);
+
+  if (PyInt_Check(instantiate_pyfunc)) {
+      return arrfunc::make<apply_numba_kernel>(proto, instantiate_pyfunc, 0);
+  }
+  else {
+      return arrfunc::make<apply_pyobject_kernel>(proto, instantiate_pyfunc, 0);
+  }
 }
